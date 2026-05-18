@@ -1,111 +1,65 @@
-import { StyleSheet } from 'react-native';
+import React from "react";
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    justifyContent: "center",
-  },
-  titulo: {
-    color: "#3f3f3f",
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
+export default function Home() {
 
-  app: {
-    color: "#3f3f3f",
-    fontSize: 15,
-    fontWeight: "bold",
-    marginTop: 10,
-    textAlign: "center",
-  },
-
-  selecionar: {
-    color: "#3f3f3f",
-    fontSize: 17,
-    fontWeight: "bold",
-    marginTop: 20,
-    marginLeft: 20,
-    marginBottom: 15,
-  },
-
-  fixToButton: {
-    flexDirection: "column",
-    marginBottom: 20,
-  },
-
-  botaoC: {
-    flexDirection: "column",
-    alignItems: "left",
-    backgroundColor: "#fffcfc",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 25,
-    marginLeft: 10,
-    width: "90%",
-    boxShadow: "5px px px 0px #ecdd0afb",
-  },
-
-  botaoF: {
-    flexDirection: "column",
-    alignItems: "left",
-    backgroundColor: "#fffcfc",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 25,
-    marginLeft: 10,
-    width: "90%",
-    boxShadow: "5px px px 0px #12d60bfb",
-  },
-
-  botaoI: {
-    flexDirection: "column",
-    alignItems: "left",
-    backgroundColor: "#fffcfc",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 25,
-    marginLeft: 10,
-    width: "90%",
-    boxShadow: "5px px px 0px #0b63d6fb",
-  },
-
-  escolha: {
-    color: "#000000",
-    fontSize: 17,
-    fontWeight: "bold",
-  },
-
-  desc: {
-    color: "#585858",
-    fontSize: 14,
-  },
-
-  login: {
-    textAlign: "center",
-    color: "#3f3f3f",
-    fontSize: 14,
-    marginBottom: 10,
-    marginTop: 14,
-  },
-
-  link: {
-    color: "#0000FF",
-    textAlign: "center",
-    fontSize: 14,
-  },
-
-  icon:{
-    fontSize: 40,
-    alignSelf: 'center',
-  },
-
-  img: {
-    width: 150,
-    height: 100,
-    alignSelf: 'center'
-  },
-});
-
-export default styles;
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#c8edf5',
+      alignItems: 'center',
+    },
+  
+    logoArea: {
+      marginTop: 120,
+      marginBottom: 120,
+    },
+  
+    logo: {
+      width: 220,
+      height: 120,
+    },
+  
+    title: {
+      fontSize: 38,
+      marginBottom: 40,
+      color: '#000',
+      fontWeight: '400',
+    },
+  
+    input: {
+      width: '90%',
+      height: 65,
+  
+      borderWidth: 2,
+      borderColor: '#000',
+      borderRadius: 40,
+  
+      marginBottom: 25,
+      paddingHorizontal: 20,
+  
+      fontSize: 22,
+      backgroundColor: 'transparent',
+    },
+  
+    button: {
+      marginTop: 10,
+  
+      backgroundColor: '#2196f3',
+  
+      width: 140,
+      height: 55,
+  
+      borderRadius: 5,
+  
+      justifyContent: 'center',
+      alignItems: 'center',
+  
+      elevation: 5,
+    },
+  
+    buttonText: {
+      color: '#fff',
+      fontSize: 22,
+      fontWeight: 'bold',
+    },
+  });}
