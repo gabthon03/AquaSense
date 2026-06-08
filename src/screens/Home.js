@@ -60,51 +60,51 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#c8edf5',
+    backgroundColor: '#ccf4ff',
     alignItems: 'center',
   },
 
   logoArea: {
-    marginTop: 120,
-    marginBottom: 120,
+    marginTop: 100,
+    marginBottom: 50,
   },
 
   logo: {
-    width: 220,
-    height: 120,
+    width: 720,
+    height: 200,
   },
 
   title: {
-    fontSize: 38,
-    marginBottom: 40,
+    fontSize: 30,
+    marginBottom: 30,
     color: '#000',
     fontWeight: '400',
   },
 
   input: {
     width: '90%',
-    height: 65,
+    height: 60,
 
     borderWidth: 2,
     borderColor: '#000',
-    borderRadius: 40,
+    borderRadius: 20,
 
     marginBottom: 25,
     paddingHorizontal: 20,
 
-    fontSize: 22,
+    fontSize: 15,
     backgroundColor: 'transparent',
   },
 
   button: {
-    marginTop: 10,
+    marginTop: 15,
 
     backgroundColor: '#2196f3',
 
     width: 140,
-    height: 55,
+    height: 45,
 
-    borderRadius: 5,
+    borderRadius: 10,
 
     justifyContent: 'center',
     alignItems: 'center',
