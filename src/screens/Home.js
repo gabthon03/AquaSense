@@ -2,266 +2,182 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   SafeAreaView,
-  Alert,
+  ScrollView,
+  Modal,
+  Alert
 } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-// 1. CONFIGURAÇÃO DO SUPABASE (Movida para o topo do arquivo)
-import { createClient } from '@supabase/supabase-js';
+export default function Home({ onLogout }) {
+  const [iaModalVisible, setIaModalVisible] = useState(false);
 
-const supabaseUrl = 'https://eycjeuuxgqfzomegqczn.supabase.co'; 
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2pldXV4Z3Fmem9tZWdxY3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1Mzk2NDEsImV4cCI6MjA5NzExNTY0MX0.5UdwuE2DMDHLfXrhT1_BXKnwk-ZhH-J1X50hTPNjgMw'; // Use sua chave anônima completa aqui
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-export default function App() {
-
-  const [criarConta, setCriarConta] = useState(false);
-  const [esqueciSenha, setEsqueciSenha] = useState(false);
-  const [logado, setLogado] = useState(false);
-
-  // === NOVOS ESTADOS PARA CAPTURAR O QUE O USUÁRIO DIGITA ===
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-
-  // === FUNÇÃO DE VALIDAÇÃO DO LOGIN / CADASTRO CONECTADA AO SUPABASE ===
-  const handleAcaoPrincipal = async () => {
-    const emailDigitado = email.trim().toLowerCase();
-
-    // 1. Fluxo de Recuperação de Senha
-    if (esqueciSenha) {
-      if (!emailDigitado) {
-        Alert.alert('Erro', 'Por favor, digite o seu e-mail de recuperação.');
-        return;
-      }
-      Alert.alert('Sucesso', `E-mail de recuperação enviado para: ${emailDigitado}`);
-      setEsqueciSenha(false);
-      return;
-    }
-
-    // 2. Fluxo de Criação de Conta (Salva no Supabase)
-    if (criarConta) {
-      if (!nome.trim() || !emailDigitado || !senha.trim()) {
-        Alert.alert('Erro', 'Preencha todos os campos para se cadastrar.');
-        return;
-      }
-
-      // Envia os dados para a tabela 'usuarios' do seu Supabase
-      const { error } = await supabase
-        .from('registro')
-        .insert([{ nome: nome.trim(), email: emailDigitado, senha: senha }]);
-
-      if (error) {
-        Alert.alert('Erro ao cadastrar', 'Este e-mail já pode estar cadastrado ou ocorreu um problema.');
-        console.log(error);
-      } else {
-        Alert.alert('Sucesso', 'Conta criada! Faça o login.');
-        setCriarConta(false);
-        setNome('');
-        setEmail('');
-        setSenha('');
-      }
-      return;
-    }
-
-    // 3. Fluxo de Login (Busca e valida as credenciais no Supabase)
-    if (!emailDigitado || !senha.trim()) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
-      return;
-    }
-
-    // Busca o usuário baseado no e-mail digitado
-    const { data, error } = await supabase
-      .from('registro')
-      .select('*')
-      .eq('email', emailDigitado)
-      .single();
-
-    if (error || !data) {
-      Alert.alert('Erro', 'E-mail não encontrado.');
-      return;
-    }
-
-    // Compara a senha do banco com a digitada
-    if (data.senha === senha) {
-      setLogado(true);
-    } else {
-      Alert.alert('Erro', 'Senha incorreta.');
-    }
-  };
-
-  // Função auxiliar para limpar os campos ao mudar de tela
-  const mudarTela = (acao) => {
-    setNome('');
-    setEmail('');
-    setSenha('');
-    acao();
-  };
-
-  // =========================
-  //  tela inicial
-  // =========================
-  if (logado) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.homeTitle}>AquaSense Dados</Text>
-
-        <View style={styles.grid}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Umidade do Solo</Text>
-            <Text style={styles.cardValue}>68%</Text>
+  return (
+    <SafeAreaView style={styles.dashboardSafeArea}>
+      <ScrollView contentContainerStyle={styles.dashboardScroll} showsVerticalScrollIndicator={false}>
+        
+        {/* HEADER AZUL MARINHO */}
+        <View style={styles.dashHeader}>
+          <View style={styles.dashHeaderTop}>
+            <View>
+              <Text style={styles.dashWelcome}>BEM-VINDO</Text>
+              <Text style={styles.dashTitle}>Minha horta</Text>
+            </View>
+            
+            <View style={styles.dashLogoBadge}>
+              <Text style={styles.dashLogoText}>Aqua</Text>
+              <Text style={styles.dashLogoSubtext}>SENSE</Text>
+            </View>
           </View>
 
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Pressão dos Canos</Text>
-            <Text style={styles.cardValue}>2.3 bar</Text>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Fluxo de Água</Text>
-            <Text style={styles.cardValue}>12 L/min</Text>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Clima do Dia</Text>
-            <Text style={styles.cardValue}>Ensolarado  32°C</Text>
-          </View>
-
-          <View style={styles.cardFull}>
-            <Text style={styles.cardTitle}>Tempo de Irrigação</Text>
-            <Text style={styles.cardValueBig}>25 minutos</Text>
+          {/* CARD HERO */}
+          <View style={styles.dashHeroCard}>
+            <View style={styles.dashStatusRow}>
+              <View style={styles.dashStatusDot} />
+              <Text style={styles.dashStatusText}>Sistema em espera</Text>
+            </View>
+            <Text style={styles.dashTimerText}>00:00</Text>
+            <Text style={styles.dashTimerSubtext}>Tempo desta irrigação</Text>
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => mudarTela(() => setLogado(false))}
-        >
-          <Text style={styles.buttonText}>SAIR</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
+        {/* BOTÕES DE AÇÃO */}
+        <View style={styles.dashActionsContainer}>
+          <TouchableOpacity style={[styles.dashActionButton, styles.dashStartButton]}>
+            <Ionicons name="play" size={18} color="#FFF" style={{ marginRight: 6 }} />
+            <Text style={styles.dashButtonText}>Iniciar</Text>
+          </TouchableOpacity>
 
-  // =========================
-  //  login e cadastro (Interface)
-  // =========================
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.logoArea}>
-        <Image
-          source={require('../../assets/aquasense.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+          <TouchableOpacity style={[styles.dashActionButton, styles.dashStopButton]}>
+            <Ionicons name="square" size={16} color="#FFF" style={{ marginRight: 6 }} />
+            <Text style={styles.dashButtonText}>Interromper</Text>
+          </TouchableOpacity>
+        </View>
 
-      <Text style={styles.title}>
-        {criarConta ? 'Criar Conta' : esqueciSenha ? 'Recuperar Senha' : 'Faça seu Login'}
-      </Text>
+        {/* GRID DE MÉTRICAS */}
+        <View style={styles.dashGrid}>
+          <View style={styles.dashMetricCard}>
+            <View style={styles.dashIconCircle}>
+              <MaterialCommunityIcons name="water-outline" size={22} color="#1B365D" />
+            </View>
+            <Text style={styles.dashMetricLabel}>Umidade do solo</Text>
+            <Text style={styles.dashMetricValue}>42%</Text>
+          </View>
 
-      {criarConta && (
-        <TextInput
-          placeholder="Nome" 
-          placeholderTextColor="#555"
-          style={styles.input}
-          value={nome}
-          onChangeText={setNome}
-        />
-      )}
+          <View style={styles.dashMetricCard}>
+            <View style={styles.dashIconCircle}>
+              <Ionicons name="thermometer-outline" size={22} color="#1B365D" />
+            </View>
+            <Text style={styles.dashMetricLabel}>Temperatura</Text>
+            <Text style={styles.dashMetricValue}>27 °C</Text>
+          </View>
 
-      {!esqueciSenha && (
-        <TextInput
-          placeholder="Email" 
-          placeholderTextColor="#555"
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      )}
+          <View style={styles.dashMetricCard}>
+            <View style={styles.dashIconCircle}>
+              <Ionicons name="speedometer-outline" size={22} color="#1B365D" />
+            </View>
+            <Text style={styles.dashMetricLabel}>Vazão da bomba</Text>
+            <Text style={styles.dashMetricValue}>1,8 L/min</Text>
+          </View>
 
-      {!esqueciSenha && (
-        <TextInput
-          placeholder="Senha" 
-          placeholderTextColor="#555"
-          secureTextEntry
-          style={styles.input}
-          value={senha}
-          onChangeText={setSenha}
-        />
-      )}
+          <View style={styles.dashMetricCard}>
+            <View style={styles.dashIconCircle}>
+              <Ionicons name="time-outline" size={22} color="#1B365D" />
+            </View>
+            <Text style={styles.dashMetricLabel}>Próxima irrigação</Text>
+            <Text style={styles.dashMetricValue}>18:00</Text>
+          </View>
+        </View>
 
-      {esqueciSenha && (
-        <TextInput
-          placeholder="Email de recuperação"
-          placeholderTextColor="#555"
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      )}
+        {/* INFORMAÇÕES GERAIS */}
+        <View style={styles.dashInfoCard}>
+          <Text style={styles.dashInfoTitle}>Informações gerais</Text>
 
-      {!criarConta && !esqueciSenha && (
-        <TouchableOpacity
-          onPress={() => mudarTela(() => setEsqueciSenha(true))}
-          style={styles.forgotContainer}
-        >
-          <Text style={styles.forgotText}>Esqueceu a senha?</Text>
-        </TouchableOpacity>
-      )}
+          <View style={styles.dashInfoRow}>
+            <Text style={styles.dashInfoLabel}>Dispositivo</Text>
+            <Text style={styles.dashInfoValue}>Arduino UNO • AquaSense-01</Text>
+          </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleAcaoPrincipal}
+          <View style={styles.dashInfoRow}>
+            <Text style={styles.dashInfoLabel}>Conexão</Text>
+            <Text style={styles.dashInfoValue}>Wi-Fi local</Text>
+          </View>
+
+          <View style={styles.dashInfoRow}>
+            <Text style={styles.dashInfoLabel}>Modo</Text>
+            <Text style={styles.dashInfoValue}>Automático programado</Text>
+          </View>
+
+          <View style={styles.dashInfoRow}>
+            <Text style={styles.dashInfoLabel}>Última irrigação</Text>
+            <Text style={styles.dashInfoValue}>Hoje, 07:30 (10 min)</Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* BOTÃO FLUTUANTE DA IA */}
+      <TouchableOpacity 
+        style={styles.fabAi} 
+        onPress={() => setIaModalVisible(true)}
       >
-        <Text style={styles.buttonText}>
-          {criarConta ? 'CADASTRAR' : esqueciSenha ? 'RECUPERAR' : 'ENTRAR'}
-        </Text>
+        <Ionicons name="sparkles" size={22} color="#FFF" />
+        <Text style={styles.fabAiText}>IA Plantas</Text>
       </TouchableOpacity>
 
-      {!esqueciSenha && (
-        <TouchableOpacity onPress={() => mudarTela(() => setCriarConta(!criarConta))}>
-          <Text style={{ marginTop: 15, color: '#000' }}>
-            {criarConta ? 'Já tenho conta' : 'Criar conta'}
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {esqueciSenha && (
-        <TouchableOpacity onPress={() => mudarTela(() => setEsqueciSenha(false))}>
-          <Text style={{ marginTop: 15, color: '#000' }}>
-            Voltar ao login
-          </Text>
-        </TouchableOpacity>
-      )}
+      {/* MODAL TEMPORÁRIO PARA O CHAT IA */}
+      <Modal visible={iaModalVisible} animationType="slide" transparent={false}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF', padding: 20 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1B365D' }}>Assistente Agrônomo IA</Text>
+            <TouchableOpacity onPress={() => setIaModalVisible(false)}>
+              <Ionicons name="close-circle" size={28} color="#64748B" />
+            </TouchableOpacity>
+          </View>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+            <Ionicons name="camera-outline" size={60} color="#1B365D" />
+            <Text style={{ fontSize: 16, textAlign: 'center', color: '#64748B', marginTop: 15 }}>
+              Espaço reservado para o envio de fotos das plantas e consulta sobre irrigação/saúde.
+            </Text>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ccf4ff', alignItems: 'center' },
-  logoArea: { marginTop: 100, marginBottom: 50 },
-  logo: { width: 720, height: 200 },
-  title: { fontSize: 30, marginBottom: 30, color: '#000', fontWeight: '400' },
-  input: { width: '90%', height: 60, borderWidth: 2, borderColor: '#000', borderRadius: 20, marginBottom: 25, paddingHorizontal: 20, fontSize: 15 },
-  forgotContainer: { width: '90%', alignItems: 'flex-start', marginTop: -15, marginBottom: 10 },
-  forgotText: { color: '#0d47a1', fontSize: 14 },
-  button: { marginTop: 15, backgroundColor: '#2196f3', width: 140, height: 45, borderRadius: 5, justifyContent: 'center', alignItems: 'center', elevation: 5 },
-  buttonText: { color: '#fff', fontSize: 22, fontWeight: 'bold' },
-  homeTitle: { fontSize: 26, fontWeight: 'bold', marginTop: 40, marginBottom: 20, color: '#000' },
-  grid: { width: '90%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  card: { width: '48%', backgroundColor: '#fff', padding: 15, borderRadius: 15, marginBottom: 15, elevation: 4 },
-  cardFull: { width: '100%', backgroundColor: '#fff', padding: 20, borderRadius: 15, marginBottom: 20, elevation: 4, alignItems: 'center' },
-  cardTitle: { fontSize: 14, color: '#555', marginBottom: 8 },
-  cardValue: { fontSize: 18, fontWeight: 'bold', color: '#000' },
-  cardValueBig: { fontSize: 28, fontWeight: 'bold', color: '#2196f3' },
+  dashboardSafeArea: { flex: 1, backgroundColor: '#1B365D' },
+  dashboardScroll: { backgroundColor: '#F3F6F9', flexGrow: 1, paddingBottom: 80 },
+  dashHeader: { backgroundColor: '#1B365D', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
+  dashHeaderTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  dashWelcome: { color: '#93C5FD', fontSize: 12, fontWeight: '700' },
+  dashTitle: { color: '#FFFFFF', fontSize: 26, fontWeight: 'bold' },
+  dashLogoBadge: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center' },
+  dashLogoText: { color: '#1B365D', fontWeight: 'bold', fontSize: 12 },
+  dashLogoSubtext: { color: '#1B365D', fontSize: 6, fontWeight: 'bold' },
+  dashHeroCard: { backgroundColor: 'rgba(255, 255, 255, 0.12)', borderRadius: 20, padding: 20 },
+  dashStatusRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  dashStatusDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#94A3B8', marginRight: 8 },
+  dashStatusText: { color: '#E2E8F0', fontSize: 14 },
+  dashTimerText: { color: '#FFF', fontSize: 42, fontWeight: 'bold' },
+  dashTimerSubtext: { color: '#94A3B8', fontSize: 12 },
+  dashActionsContainer: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: -25, marginBottom: 15 },
+  dashActionButton: { flex: 0.48, height: 50, borderRadius: 16, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+  dashStartButton: { backgroundColor: '#2563EB' },
+  dashStopButton: { backgroundColor: '#F47174' },
+  dashButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+  dashGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 20 },
+  dashMetricCard: { width: '48%', backgroundColor: '#FFF', borderRadius: 20, padding: 16, marginBottom: 15 },
+  dashIconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E0F2FE', justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
+  dashMetricLabel: { fontSize: 12, color: '#64748B', marginBottom: 4 },
+  dashMetricValue: { fontSize: 20, fontWeight: 'bold', color: '#1E293B' },
+  dashInfoCard: { backgroundColor: '#FFF', borderRadius: 20, marginHorizontal: 20, padding: 20 },
+  dashInfoTitle: { fontSize: 18, fontWeight: 'bold', color: '#1E293B', marginBottom: 15 },
+  dashInfoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  dashInfoLabel: { fontSize: 14, color: '#64748B' },
+  dashInfoValue: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
+  fabAi: { position: 'absolute', bottom: 20, right: 20, backgroundColor: '#2563EB', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 12, borderRadius: 30, elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 },
+  fabAiText: { color: '#FFF', fontWeight: 'bold', marginLeft: 8, fontSize: 14 },
 });
