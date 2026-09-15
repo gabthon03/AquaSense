@@ -6,15 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  SafeAreaView,
   Alert,
 } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { createClient } from '@supabase/supabase-js';
 
-WebBrowser.maybeCompleteAuthSession();
-
-const supabaseUrl = 'https://rtymntfuqasywuemcudr.supabase.co'; 
+const supabaseUrl = 'https://eycjeuuxgqfzomegqczn.supabase.co'; 
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2pldXV4Z3Fmem9tZWdxY3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1Mzk2NDEsImV4cCI6MjA5NzExNTY0MX0.5UdwuE2DMDHLfXrhT1_BXKnwk-ZhH-J1X50hTPNjgMw'; 
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -26,27 +23,6 @@ export default function LoginScreen({ onLoginSuccess }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-
-  const handleGoogleLogin = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { skipBrowserRedirect: true },
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        const result = await WebBrowser.openAuthSessionAsync(data.url);
-        if (result.type === 'success') {
-          Alert.alert('Sucesso', 'Login realizado com o Google!');
-          onLoginSuccess();
-        }
-      }
-    } catch (error) {
-      Alert.alert('Erro no Login Google', error.message || 'Erro de autenticação.');
-    }
-  };
 
   const handleAcaoPrincipal = async () => {
     const emailDigitado = email.trim().toLowerCase();
@@ -129,19 +105,6 @@ export default function LoginScreen({ onLoginSuccess }) {
         <Text style={styles.buttonText}>{criarConta ? 'CADASTRAR' : esqueciSenha ? 'RECUPERAR' : 'ENTRAR'}</Text>
       </TouchableOpacity>
 
-      {!esqueciSenha && (
-        <>
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>ou</Text>
-            <View style={styles.dividerLine} />
-          </View>
-          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-            <Text style={styles.googleButtonText}>Continuar com o Google</Text>
-          </TouchableOpacity>
-        </>
-      )}
-
       <TouchableOpacity onPress={() => setCriarConta(!criarConta)}>
         <Text style={styles.switchText}>
           {criarConta ? 'Já tenho conta? Entrar' : 'Não tem conta? Criar conta'}
@@ -159,12 +122,7 @@ const styles = StyleSheet.create({
   input: { width: '90%', height: 50, backgroundColor: '#E9ECEF', borderRadius: 25, marginBottom: 12, paddingHorizontal: 20, fontSize: 16, color: '#333' },
   forgotContainer: { width: '85%', alignItems: 'flex-start', marginBottom: 15 },
   forgotText: { color: '#0d47a1', fontSize: 14, fontWeight: '500' },
-  button: { backgroundColor: '#1E3A8A', width: '90%', height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
+  button: { backgroundColor: '#1E3A8A', width: '90%', height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  dividerContainer: { flexDirection: 'row', alignItems: 'center', width: '90%', marginVertical: 20 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#DDD' },
-  dividerText: { marginHorizontal: 10, color: '#888', fontSize: 14 },
-  googleButton: { width: '90%', height: 50, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#DDD', borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
-  googleButtonText: { color: '#333', fontSize: 15, fontWeight: 'bold' },
-  switchText: { marginTop: 10, color: '#555', fontSize: 14, fontWeight: '500' },
+  switchText: { marginTop: 20, color: '#555', fontSize: 14, fontWeight: '500' },
 });

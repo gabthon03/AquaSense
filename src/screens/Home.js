@@ -7,12 +7,40 @@ import {
   SafeAreaView,
   ScrollView,
   Modal,
-  Alert
+  TextInput,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Home({ onLogout }) {
   const [iaModalVisible, setIaModalVisible] = useState(false);
+  const [mensagem, setMensagem] = useState('');
+  const [historicoChat, setHistoricoChat] = useState([
+    { id: '1', tipo: 'ia', texto: 'Olá! Sou o assistente agronômico do AquaSense. Como posso ajudar com a irrigação ou saúde das suas plantas hoje? Você pode digitar sua dúvida ou enviar uma foto.' }
+  ]);
+
+  const enviarMensagem = () => {
+    if (!mensagem.trim()) return;
+
+    const novaMensagemUsuario = { id: Date.now().toString(), tipo: 'usuario', texto: mensagem };
+    setHistoricoChat(prev => [...prev, novaMensagemUsuario]);
+    const textoAtual = mensagem;
+    setMensagem('');
+
+    // Simulação de resposta da IA (aqui você poderá plugar sua API de IA futuramente)
+    setTimeout(() => {
+      let respostaIa = 'Analisei sua solicitação sobre as plantas. Mantenha o solo monitorado.';
+      if (textoAtual.toLowerCase().includes('irrigação') || textoAtual.toLowerCase().includes('agua')) {
+        respostaIa = 'Para o nível atual de umidade, recomendo manter a irrigação automatizada nos horários mais frescos do dia (manhã ou final da tarde).';
+      } else if (textoAtual.toLowerCase().includes('amarela') || textoAtual.toLowerCase().includes('folha')) {
+        respostaIa = 'Folhas amareladas podem indicar excesso de água ou falta de nutrientes específicos no solo. Tente enviar uma foto para uma análise detalhada.';
+      }
+
+      const novaMensagemIa = { id: (Date.now() + 1).toString(), tipo: 'ia', texto: respostaIa };
+      setHistoricoChat(prev => [...prev, novaMensagemIa]);
+    }, 1000);
+  };
 
   return (
     <SafeAreaView style={styles.dashboardSafeArea}>
@@ -126,21 +154,54 @@ export default function Home({ onLogout }) {
         <Text style={styles.fabAiText}>IA Plantas</Text>
       </TouchableOpacity>
 
-      {/* MODAL TEMPORÁRIO PARA O CHAT IA */}
+      {/* MODAL DO CHAT IA */}
       <Modal visible={iaModalVisible} animationType="slide" transparent={false}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF', padding: 20 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1B365D' }}>Assistente Agrônomo IA</Text>
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="sparkles" size={20} color="#2563EB" style={{ marginRight: 8 }} />
+              <Text style={styles.modalTitle}>Assistente Agrônomo IA</Text>
+            </View>
             <TouchableOpacity onPress={() => setIaModalVisible(false)}>
               <Ionicons name="close-circle" size={28} color="#64748B" />
             </TouchableOpacity>
           </View>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
-            <Ionicons name="camera-outline" size={60} color="#1B365D" />
-            <Text style={{ fontSize: 16, textAlign: 'center', color: '#64748B', marginTop: 15 }}>
-              Espaço reservado para o envio de fotos das plantas e consulta sobre irrigação/saúde.
-            </Text>
-          </View>
+
+          <ScrollView contentContainerStyle={styles.chatScroll} showsVerticalScrollIndicator={false}>
+            {historicoChat.map((item) => (
+              <View 
+                key={item.id} 
+                style={[
+                  styles.chatBubble, 
+                  item.tipo === 'usuario' ? styles.bubbleUsuario : styles.bubbleIa
+                ]}
+              >
+                <Text style={[styles.bubbleText, item.tipo === 'usuario' ? styles.textUsuario : styles.textIa]}>
+                  {item.texto}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={10}>
+            <View style={styles.chatInputContainer}>
+              <TouchableOpacity style={styles.chatCameraButton} onPress={() => alert('Abrir câmera/galeria para enviar foto da planta!')}>
+                <Ionicons name="camera-outline" size={22} color="#2563EB" />
+              </TouchableOpacity>
+              
+              <TextInput
+                style={styles.chatInput}
+                placeholder="Digite sua dúvida sobre irrigação..."
+                placeholderTextColor="#94A3B8"
+                value={mensagem}
+                onChangeText={setMensagem}
+              />
+
+              <TouchableOpacity style={styles.chatSendButton} onPress={enviarMensagem}>
+                <Ionicons name="send" size={18} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -180,4 +241,18 @@ const styles = StyleSheet.create({
   dashInfoValue: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
   fabAi: { position: 'absolute', bottom: 20, right: 20, backgroundColor: '#2563EB', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 12, borderRadius: 30, elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 },
   fabAiText: { color: '#FFF', fontWeight: 'bold', marginLeft: 8, fontSize: 14 },
+  modalContainer: { flex: 1, backgroundColor: '#F8F9FA' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1B365D' },
+  chatScroll: { padding: 16, flexGrow: 1 },
+  chatBubble: { maxWidth: '80%', padding: 12, borderRadius: 16, marginBottom: 12 },
+  bubbleIa: { backgroundColor: '#FFF', alignSelf: 'flex-start', borderWidth: 1, borderColor: '#E2E8F0' },
+  bubbleUsuario: { backgroundColor: '#2563EB', alignSelf: 'flex-end' },
+  bubbleText: { fontSize: 14, lineHeight: 20 },
+  textIa: { color: '#1E293B' },
+  textUsuario: { color: '#FFF' },
+  chatInputContainer: { flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: '#FFF', borderTopWidth: 1, borderTopColor: '#E2E8F0' },
+  chatCameraButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center', marginRight: 8 },
+  chatInput: { flex: 1, backgroundColor: '#F1F5F9', borderRadius: 20, paddingHorizontal: 16, height: 44, fontSize: 14, color: '#1E293B' },
+  chatSendButton: { width: 40, height: 40, backgroundColor: '#2563EB', borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginLeft: 8 }
 });
