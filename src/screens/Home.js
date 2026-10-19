@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import { GoogleGenAI } from '@google/genai';
+
+// Inicialize o SDK. O ideal é usar variáveis de ambiente do Expo (ex: EXPO_PUBLIC_GEMINI_API_KEY)
+const ai = new GoogleGenAI({ 
+  apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'IA123' 
+});
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +15,8 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -20,6 +27,38 @@ export default function Home({ onLogout }) {
     { id: '1', tipo: 'ia', texto: 'Olá! Sou o assistente agronômico do AquaSense. Como posso ajudar com a irrigação ou saúde das suas plantas hoje? Você pode digitar sua dúvida ou enviar uma foto.' }
   ]);
 
+  // ESTADOS DA TEMPERATURA EM TEMPO REAL
+  const [temperatura, setTemperatura] = useState(null);
+  const [loadingTemp, setLoadingTemp] = useState(true);
+
+  // COLOQUE SUA CHAVE DA OPENWEATHERMAP AQUI:
+  const API_KEY = 'temperatura123';
+  const CIDADE = 'Sao Paulo';
+
+  // BUSCA DA TEMPERATURA EM TEMPO REAL
+  useEffect(() => {
+    const buscarTemperatura = async () => {
+      try {
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${CIDADE}&units=metric&appid=${API_KEY}&lang=pt_br`
+        );
+        const data = await response.json();
+        
+        if (response.ok) {
+          setTemperatura(data.main.temp);
+        } else {
+          console.log('Erro ao buscar clima:', data.message);
+        }
+      } catch (error) {
+        console.log('Erro de rede ao buscar temperatura:', error);
+      } finally {
+        setLoadingTemp(false);
+      }
+    };
+
+    buscarTemperatura();
+  }, []);
+
   const enviarMensagem = () => {
     if (!mensagem.trim()) return;
 
@@ -28,7 +67,7 @@ export default function Home({ onLogout }) {
     const textoAtual = mensagem;
     setMensagem('');
 
-    // Simulação de resposta da IA (aqui você poderá plugar sua API de IA futuramente)
+    // Simulação de resposta da IA
     setTimeout(() => {
       let respostaIa = 'Analisei sua solicitação sobre as plantas. Mantenha o solo monitorado.';
       if (textoAtual.toLowerCase().includes('irrigação') || textoAtual.toLowerCase().includes('agua')) {
@@ -91,15 +130,24 @@ export default function Home({ onLogout }) {
               <MaterialCommunityIcons name="water-outline" size={22} color="#1B365D" />
             </View>
             <Text style={styles.dashMetricLabel}>Umidade do solo</Text>
-            <Text style={styles.dashMetricValue}>42%</Text>
+            <Text style={styles.dashMetricValue}>0%</Text>
           </View>
 
+          {/* CARD DE TEMPERATURA ATUALIZADO */}
           <View style={styles.dashMetricCard}>
             <View style={styles.dashIconCircle}>
               <Ionicons name="thermometer-outline" size={22} color="#1B365D" />
             </View>
             <Text style={styles.dashMetricLabel}>Temperatura</Text>
-            <Text style={styles.dashMetricValue}>27 °C</Text>
+            <Text style={styles.dashMetricValue}>
+              {loadingTemp ? (
+                <ActivityIndicator size="small" color="#1B365D" />
+              ) : temperatura !== null ? (
+                `${Math.round(temperatura)} °C`
+              ) : (
+                '-- °C'
+              )}
+            </Text>
           </View>
 
           <View style={styles.dashMetricCard}>
@@ -107,7 +155,7 @@ export default function Home({ onLogout }) {
               <Ionicons name="speedometer-outline" size={22} color="#1B365D" />
             </View>
             <Text style={styles.dashMetricLabel}>Vazão da bomba</Text>
-            <Text style={styles.dashMetricValue}>1,8 L/min</Text>
+            <Text style={styles.dashMetricValue}>0 L/min</Text>
           </View>
 
           <View style={styles.dashMetricCard}>
@@ -115,7 +163,7 @@ export default function Home({ onLogout }) {
               <Ionicons name="time-outline" size={22} color="#1B365D" />
             </View>
             <Text style={styles.dashMetricLabel}>Próxima irrigação</Text>
-            <Text style={styles.dashMetricValue}>18:00</Text>
+            <Text style={styles.dashMetricValue}>A programar</Text>
           </View>
         </View>
 
@@ -140,7 +188,7 @@ export default function Home({ onLogout }) {
 
           <View style={styles.dashInfoRow}>
             <Text style={styles.dashInfoLabel}>Última irrigação</Text>
-            <Text style={styles.dashInfoValue}>Hoje, 07:30 (10 min)</Text>
+            <Text style={styles.dashInfoValue}>Não foi irrigado</Text>
           </View>
         </View>
       </ScrollView>

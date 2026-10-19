@@ -19,13 +19,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/aquasense.png",
         "backgroundColor": "#1B365D"
-      }
+      },
+      "package": "com.gabhtml.AquaSense"
     },
     "web": {
       "favicon": "./assets/aquasense.png"
     },
     "plugins": [
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f340dd92-b07e-4ff0-bb9b-3d17b56d4d7a"
+      }
+    }
   }
 }
